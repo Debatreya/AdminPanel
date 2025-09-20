@@ -1,12 +1,12 @@
 "use client";
 
 import BaseCard from "../base_card";
-import { deleteTechspardhaTeam } from "@/app/actions/techspardha_teams";
+import { techspardhaTeamsApi } from "@/app/utils/apiClient";
 
 export default function ViewTeamsClient({ teamList }: { teamList: any[] }) {
   const handleDelete = async (teamId: string) => {
-    // Handle delete functionality
-    await deleteTechspardhaTeam(teamId);
+    // Handle delete functionality using the API client
+    await techspardhaTeamsApi.delete(teamId);
     // Optionally refresh or update state here
     console.log(`Team ${teamId} deleted`);
   };

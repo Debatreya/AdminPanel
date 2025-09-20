@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { BaseForm } from "../base_form";
 import { createSponsorFormConfig } from "@/app/constants/sponsor";
-import { updateSponsor, getSponsorById } from "@/app/actions/sponsors";
-// import { getSponsorById, updateSponsor } from "@/app/actions/sponsor";
+import { sponsorsApi } from "@/app/utils/apiClient";
 
 interface FormState {
   category: string;
@@ -31,7 +30,16 @@ export default function UpdateSponsorForm({
   useEffect(() => {
     const fetchSponsorData = async () => {
       try {
-        const sponsor = await getSponsorById(id, category);
+        // First try to use the API to get a specific sponsor
+        // Since we don't have a direct getSponsorById API endpoint,
+        // we'll fetch all sponsors and filter for the one we want
+        const allSponsors = await sponsorsApi.getAll();
+        const sponsor = allSponsors.find((s: any) => s.id === id && s.category === category);
+        
+        if (!sponsor) {
+          throw new Error(`Sponsor not found with id ${id} in category ${category}`);
+        }
+        
         setForm({
           category: decodeURIComponent(category),
           name: sponsor.name || "",
@@ -64,7 +72,13 @@ export default function UpdateSponsorForm({
     setIsSubmitting(true);
 
     try {
-      await updateSponsor(id, category, form);
+      // Add the id to the form data for the API update
+      const updateData = {
+        ...form,
+        id: id,
+      };
+      
+      await sponsorsApi.update(updateData);
       alert("Sponsor updated successfully!");
       setIsSubmitting(false);
     } catch (error) {

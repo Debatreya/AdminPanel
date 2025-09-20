@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteSponsor } from "@/app/actions/sponsors";
+import { sponsorsApi } from "@/app/utils/apiClient";
 import BaseCard from "../base_card";
 
 type Sponsor = {
@@ -17,7 +17,7 @@ export default function ViewSponsorClient({
   sponsors: Sponsor[];
 }) {
   const handleDelete = async (sponsor: Sponsor) => {
-    await deleteSponsor(sponsor.category, sponsor.id as string);
+    await sponsorsApi.delete(sponsor.id as string, sponsor.category);
     console.log(`Sponsor ${sponsor.id} of ${sponsor.category} deleted`);
   };
   return (

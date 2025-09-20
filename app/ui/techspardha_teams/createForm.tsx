@@ -6,7 +6,7 @@ import {
   createTeamFormConfig,
   addContactFormConfig,
 } from "@/app/constants/techspardha_teams";
-import { createTechspardhaTeam } from "@/app/actions/techspardha_teams";
+import { techspardhaTeamsApi } from "@/app/utils/apiClient";
 import createImgbbUrl from "@/app/helpers/imgbb";
 
 interface Contact {
@@ -121,11 +121,12 @@ export default function CreateForm() {
           ),
         },
       };
-      // Call the action to create the team
-      await createTechspardhaTeam(
-        CreateTechspardhaTeamArgs.team || "",
-        CreateTechspardhaTeamArgs.data,
-      );
+      // Call the API to create the team
+      await techspardhaTeamsApi.create({
+        teamName: CreateTechspardhaTeamArgs.team || "",
+        logo: CreateTechspardhaTeamArgs.data.logo,
+        contacts: CreateTechspardhaTeamArgs.data.contacts
+      });
       setForm({});
       setContacts([0, 1]);
       setErrorText(""); // Reset error message

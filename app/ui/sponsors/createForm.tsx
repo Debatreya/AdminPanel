@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { BaseForm } from "../base_form";
-import { createSponsor } from "@/app/actions/sponsors";
+import { sponsorsApi } from "@/app/utils/apiClient";
 import { createSponsorFormConfig } from "@/app/constants/sponsor";
 
 interface FormState {
@@ -56,7 +56,7 @@ export default function CreateForm() {
 
     try {
       for (const form of forms) {
-        await createSponsor(form); // Submit each form
+        await sponsorsApi.create(form); // Submit each form using the API client
       }
       setForms([{} as any]); // Reset forms
       setErrorText("");

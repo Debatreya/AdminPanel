@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import BaseTable from "../base_table";
-import { deleteLecture, getAllLecture } from "@/app/actions/lecture";
+import { lecturesApi } from "@/app/utils/apiClient";
 
 // Define the GuestLecture type
 interface GuestLecture {
@@ -26,7 +26,7 @@ export default function GuestLectureTable() {
   useEffect(() => {
     const fetchLectures = async () => {
       try {
-        const lecturesData = await getAllLecture();
+        const lecturesData = await lecturesApi.getAll();
         setLectures(lecturesData);
       } catch (err) {
         setError("Failed to load guest lectures");
@@ -46,7 +46,7 @@ export default function GuestLectureTable() {
 
   const handleDelete = async (id: string) => {
     try {
-      await deleteLecture(id);
+      await lecturesApi.delete(id);
       setLectures((prevLectures: any) =>
         prevLectures.filter((lecture: any) => lecture.id !== id),
       );
