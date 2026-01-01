@@ -1,0 +1,8 @@
+# React Context Providers
+
+Global state management using React Context.
+
+Examples:
+- auth-context.tsx - User authentication state
+- theme-context.tsx - Theme/UI state
+- app-context.tsx - Global application state

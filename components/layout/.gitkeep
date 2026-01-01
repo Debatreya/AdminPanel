@@ -1,0 +1,10 @@
+# Layout Components
+
+Components for page layout and navigation.
+
+Examples:
+- header.tsx
+- sidebar.tsx
+- footer.tsx
+- navigation.tsx
+- breadcrumbs.tsx

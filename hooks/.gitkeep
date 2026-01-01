@@ -1,0 +1,9 @@
+# Custom React Hooks
+
+Reusable React hooks for state management and side effects.
+
+Examples:
+- use-auth.ts - Authentication hook
+- use-api.ts - API data fetching hook
+- use-local-storage.ts - Local storage hook
+- use-debounce.ts - Debounce hook

@@ -1,0 +1,10 @@
+# UI Components
+
+Basic, reusable UI components like buttons, inputs, modals, etc.
+
+Examples:
+- button.tsx
+- input.tsx
+- modal.tsx
+- card.tsx
+- tooltip.tsx

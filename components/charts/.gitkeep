@@ -1,0 +1,9 @@
+# Chart & Visualization Components
+
+Components for data visualization and charts.
+
+Examples:
+- bar-chart.tsx
+- pie-chart.tsx
+- line-chart.tsx
+- analytics-card.tsx

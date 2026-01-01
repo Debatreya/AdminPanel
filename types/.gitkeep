@@ -1,0 +1,9 @@
+# TypeScript Type Definitions
+
+Centralized TypeScript types and interfaces.
+
+Examples:
+- auth.ts - Authentication related types
+- api.ts - API response/request types
+- common.ts - Common shared types
+- database.ts - Database entity types

@@ -1,0 +1,8 @@
+# API Routes
+
+This folder will contain all API route handlers.
+
+Structure:
+- Each API endpoint should be organized by feature
+- Use Next.js API routes pattern
+- Follow RESTful conventions

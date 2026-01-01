@@ -1,0 +1,9 @@
+# Configuration Files
+
+Application configuration and environment setup.
+
+Examples:
+- database.ts - Database configuration
+- env.ts - Environment variables validation
+- auth.ts - Authentication configuration
+- api.ts - API configuration

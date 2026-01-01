@@ -1,0 +1,9 @@
+# Table Components
+
+Data table components for different entities.
+
+Examples:
+- societies-table.tsx
+- events-table.tsx
+- sponsors-table.tsx
+- developers-table.tsx

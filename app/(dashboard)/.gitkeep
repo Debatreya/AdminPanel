@@ -1,0 +1,10 @@
+# Dashboard Routes
+
+Route group for dashboard and admin pages.
+These routes won't affect the URL structure due to the parentheses.
+
+Examples:
+- societies/ - Societies management
+- events/ - Events management
+- sponsors/ - Sponsors management
+- developers/ - Developers management

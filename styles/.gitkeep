@@ -1,0 +1,8 @@
+# Additional Styles
+
+Component-specific and utility styles.
+
+Examples:
+- components.css - Component-specific styles
+- utilities.css - Utility classes
+- animations.css - Animation definitions
