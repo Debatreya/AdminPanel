@@ -1,31 +1,42 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ILecture extends Document {
-  societyId: string;
+  society: mongoose.Types.ObjectId;
+  societyID: string;
+  societyName: string;
+
   lectures: Array<{
-    id: string;
     imgurl: string;
   }>;
 }
 
-const LectureSchema: Schema = new Schema({
-  societyId: {
+const LectureSchema = new Schema<ILecture>({
+  society: {
+    type: Schema.Types.ObjectId,
+    ref: 'Society',
+    required: true,
+    index: true
+  },
+
+  societyID: {
     type: String,
     required: true,
-    ref: 'Society'
+    index: true
   },
+
+  societyName: {
+    type: String,
+    required: true,
+    index: true
+  },
+
   lectures: [{
-    id: {
-      type: String,
-      required: true
-    },
     imgurl: {
       type: String,
       required: true
     }
   }]
-}, {
-  timestamps: true
-});
+}, { timestamps: true });
 
-export default mongoose.models.Lecture || mongoose.model<ILecture>('Lecture', LectureSchema);
+export default mongoose.models.Lecture ||
+  mongoose.model<ILecture>('Lecture', LectureSchema);
