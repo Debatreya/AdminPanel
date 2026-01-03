@@ -1,10 +1,10 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { YEAR_LEVELS } from '../../constants/enums';
+import { YEAR_LEVELS, SOCIETY_NAMES } from '../../constants/enums';
 
 export interface ISociety extends Document {
-  societyID: string;
-  name: string;
-  logo: string;  
+  name: SOCIETY_NAMES;   // FIXED ENUM
+  logo: string;
+
   convenor: {
     year: YEAR_LEVELS;
     name: string;
@@ -12,8 +12,8 @@ export interface ISociety extends Document {
     password: string;
     imgurl: string;
   };
+
   coConvenors: Array<{
-    id: string;
     name: string;
     imgurl: string;
     year: YEAR_LEVELS;
@@ -21,16 +21,11 @@ export interface ISociety extends Document {
 }
 
 const SocietySchema = new Schema<ISociety>({
-  societyID: {
-    type: String,
-    required: true,
-    unique: true,
-    index: true
-  },
-
   name: {
     type: String,
+    enum: Object.values(SOCIETY_NAMES),
     required: true,
+    unique: true,
     index: true
   },
 
@@ -62,5 +57,5 @@ const SocietySchema = new Schema<ISociety>({
   }]
 }, { timestamps: true });
 
-
-export default mongoose.models.Society || mongoose.model<ISociety>('Society', SocietySchema);
+export default mongoose.models.Society ||
+  mongoose.model<ISociety>('Society', SocietySchema);

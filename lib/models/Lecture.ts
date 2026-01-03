@@ -1,10 +1,9 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { SOCIETY_NAMES } from '../../constants/enums';
 
 export interface ILecture extends Document {
   society: mongoose.Types.ObjectId;
-  societyID: string;
-  societyName: string;
-
+  societyName: SOCIETY_NAMES;
   lectures: Array<{
     imgurl: string;
   }>;
@@ -18,14 +17,9 @@ const LectureSchema = new Schema<ILecture>({
     index: true
   },
 
-  societyID: {
-    type: String,
-    required: true,
-    index: true
-  },
-
   societyName: {
     type: String,
+    enum: Object.values(SOCIETY_NAMES),
     required: true,
     index: true
   },

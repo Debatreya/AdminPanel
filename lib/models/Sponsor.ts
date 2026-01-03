@@ -1,13 +1,12 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { SPONSOR_TYPES } from '../../constants/enums';
+import { SPONSOR_TYPES, SOCIETY_NAMES } from '../../constants/enums';
 
 export interface ISponsor extends Document {
   sponsorType: SPONSOR_TYPES;
 
   sponsors: Array<{
     society: mongoose.Types.ObjectId;
-    societyID: string;
-    societyName: string;
+    societyName: SOCIETY_NAMES;
     imgurl: string;
     title: string;
   }>;
@@ -27,13 +26,9 @@ const SponsorSchema = new Schema<ISponsor>({
       ref: 'Society',
       required: true
     },
-    societyID: {
-      type: String,
-      required: true,
-      index: true
-    },
     societyName: {
       type: String,
+      enum: Object.values(SOCIETY_NAMES),
       required: true,
       index: true
     },

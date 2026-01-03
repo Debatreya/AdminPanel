@@ -1,4 +1,4 @@
-export enum SOCIETIES {
+export enum SOCIETY_NAMES  {
   SOCIETY1 = "society1",
   SOCIETY2 = "society2",
   SOCIETY3 = "society3"
