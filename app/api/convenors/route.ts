@@ -5,7 +5,24 @@ import connectDB from '@/lib/db';
 import Society from '@/lib/models/Society';
 import { SOCIETY_NAMES,YEAR_LEVELS } from '@/constants';
 
+function groupByTechSorted<T extends { tech: number }>(items: T[]) {
+  const grouped = items.reduce<Record<number, T[]>>((acc, item) => {
+    if (!acc[item.tech]) acc[item.tech] = [];
+    acc[item.tech].push(item);
+    return acc;
+  }, {});
+
+  return Object.fromEntries(
+    Object.entries(grouped).sort(
+      ([a], [b]) => Number(b) - Number(a)
+    )
+  );
+}
+
+
+
 // GET /api/convenors - Get all convenors of a all societies/particular society 
+
 export async function GET(req: Request) {
   try {
     await connectDB();
@@ -13,25 +30,55 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const societyName = searchParams.get('societyName');
 
-    //CASE 1: No params → return ALL societies
+    // ✅ history enabled by default
+    const includeHistory = searchParams.get('includeHistory') !== 'false';
+
+    // 🔹 CASE 1: ALL societies
     if (!societyName) {
-      const societies = await Society.find({});
+      const societies = await Society.find({})
+        .populate('currentConvenor.userId', 'name imgurl')
+        .populate(
+          includeHistory ? 'convenorHistory.userId' : '',
+          'name imgurl'
+        );
 
       return NextResponse.json(
         {
-          societies: societies.map((society) => ({
-            id: society._id,
-            name: society.name,
-            logo: society.logo,
-            convenor: society.convenor,
-            coConvenors: society.coConvenors
-          }))
+          societies: societies.map((society) => {
+            const base = {
+              id: society._id,
+              name: society.name,
+              logo: society.logo,
+              currentConvenor: {
+                tech: society.currentConvenor.tech,
+                user: society.currentConvenor.userId
+              },
+              currentCoConvenors: society.currentCoConvenors
+            };
+
+            if (includeHistory) {
+              return {
+                ...base,
+                convenorHistory: groupByTechSorted(
+                  society.convenorHistory.map((c) => ({
+                    user: c.userId,
+                    tech: c.tech
+                  }))
+                ),
+                coConvenorHistory: groupByTechSorted(
+                  society.coConvenorHistory
+                )
+              };
+            }
+
+            return base;
+          })
         },
         { status: 200 }
       );
     }
 
-    // CASE 2: societyName provided → return ONE society
+    // 🔹 CASE 2: Single society
     if (!Object.values(SOCIETY_NAMES).includes(societyName as SOCIETY_NAMES)) {
       return NextResponse.json(
         { message: 'Invalid society name' },
@@ -39,7 +86,12 @@ export async function GET(req: Request) {
       );
     }
 
-    const society = await Society.findOne({ name: societyName });
+    const society = await Society.findOne({ name: societyName })
+      .populate('currentConvenor.userId', 'name imgurl')
+      .populate(
+        includeHistory ? 'convenorHistory.userId' : '',
+        'name imgurl'
+      );
 
     if (!society) {
       return NextResponse.json(
@@ -48,18 +100,31 @@ export async function GET(req: Request) {
       );
     }
 
-    return NextResponse.json(
-      {
-        society: {
-          id: society._id,
-          name: society.name,
-          logo: society.logo,
-          convenor: society.convenor,
-          coConvenors: society.coConvenors
-        }
+    const response: any = {
+      id: society._id,
+      name: society.name,
+      logo: society.logo,
+      currentConvenor: {
+        tech: society.currentConvenor.tech,
+        user: society.currentConvenor.userId
       },
-      { status: 200 }
-    );
+      currentCoConvenors: society.currentCoConvenors
+    };
+
+    if (includeHistory) {
+      response.convenorHistory = groupByTechSorted(
+        society.convenorHistory.map((c) => ({
+          user: c.userId,
+          tech: c.tech
+        }))
+      );
+
+      response.coConvenorHistory = groupByTechSorted(
+        society.coConvenorHistory
+      );
+    }
+
+    return NextResponse.json({ society: response }, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
@@ -68,7 +133,6 @@ export async function GET(req: Request) {
     );
   }
 }
-
 
 export async function POST(req: Request) {
   try {
