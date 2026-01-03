@@ -121,3 +121,60 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+Got it 👍 — short, clean, **developer-first**, with **optional details hidden behind toggles**.
+
+Below is the **Markdown code** you can paste directly into `README.md`.
+
+---
+
+## 📘 GET /api/convenor
+
+Fetch society details along with their **convenor** and **co-convenors**.
+
+---
+
+### 🔗 Endpoint
+```http
+GET /api/convenor
+````
+
+---
+
+### 🔁 Usage
+
+#### 🔹 Get all societies
+
+```http
+GET /api/convenor
+```
+
+#### 🔹 Get a specific society
+
+```http
+GET /api/convenor?societyName=CSI
+```
+
+---
+
+### 📥 Query Parameters
+
+| Name          | Type | Required | Description               |
+| ------------- | ---- | -------- | ------------------------- |
+| `societyName` | ENUM | No       | Society name (fixed enum) |
+
+---
+
+### 📤 Success Response (200)
+
+```json
+{
+  "id": "65f1...",
+  "name": "society1",
+  "logo": "...",
+  "convenor": { "name": "user1", "year": "FINAL" },
+  "coConvenors": []
+}
+```
+
