@@ -178,6 +178,42 @@ or
         "role": "ADMIN"
     }
 }
-````
+```
 </details>
 
+## API POST /api/auth/login  
+Authenticate a user and issue a **JWT token** for protected routes.
+
+---
+
+### 📥 Expected Request Format
+<details>
+<summary>Click to expand</summary>
+
+```json
+{
+  "rollno": "123103100",
+  "password": "secret123"
+}
+```
+</details>
+
+### 📥 Expected Response  Format
+<details>
+<summary>Click to expand</summary>
+
+```json
+{
+  "message": "Login successful",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "65fa123abc",
+    "name": "Harshit",
+    "rollno": "123103100",
+    "imgurl": "https://example.com/harshit.png",
+    "role": "CONVENOR",
+    "societyName": "society1"
+  }
+}
+```
+</details>
