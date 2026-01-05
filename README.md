@@ -268,3 +268,66 @@ Society Created + Convenor Assigned (201)
   "tech": 2025
 }
 ```
+</details>
+
+## API POST /api/convenors/co-convenors/all  
+Replace **all current co-convenors** of a society in one operation.  
+> 🔒 **Accessible by ADMIN or current CONVENOR of the society**  
+> - Clears existing co-convenors  
+> - Moves them to history  
+> - Sets a fresh list for the given tech year  
+
+---
+
+### 📥 Expected Request Format
+<details>
+<summary>Click to expand</summary>
+
+```json
+{
+  "societyName": "society1",
+  "tech": 2025,
+  "coConvenors": [
+    {
+      "name": "Aman",
+      "imgurl": "https://example.com/aman.png"
+    },
+    {
+      "name": "Riya",
+      "imgurl": "https://example.com/riya.png"
+    }
+  ]
+}
+```
+
+- **Notes**
+  - Co-Convenors Must be provided as a complete replacement list
+  - Existing co-convenors are automatically moved to history
+</details>
+
+### 📤 Expected Response Format
+<details> <summary>Click to expand</summary>
+
+```json
+{
+    "message": "Co-convenors updated successfully",
+    "society": "society1",
+    "tech": 2026,
+    "coConvenors": [
+        {
+            "name": "Shobita",
+            "imgurl": "https://example.com/aman.png",
+            "tech": 2026,
+            "_id": "695b7bdb03cc75ae179842c9"
+        },
+        {
+            "name": "Yash",
+            "imgurl": "https://example.com/riya.png",
+            "tech": 2026,
+            "_id": "695b7bdb03cc75ae179842ca"
+        }
+    ]
+}
+```
+
+</details>
