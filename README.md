@@ -329,5 +329,45 @@ Replace **all current co-convenors** of a society in one operation.
     ]
 }
 ```
-
 </details>
+
+## API POST /api/convenors/co-convenors  
+Add **one co-convenor** to a society.  
+
+> 🔒 Accessible by **ADMIN** or **current CONVENOR** of the society  
+> - Appends a single co-convenor  
+> - Does NOT affect existing co-convenors  
+> - Does NOT modify history  
+
+---
+
+### 📥 Expected Request Format
+<details>
+<summary>Click to expand</summary>
+
+```json
+{
+  "societyName": "society1",
+  "coConvenor": {
+    "name": "Harsh",
+    "imgurl": "https://example.com/harsh.png"
+  }
+}
+```
+</details>
+
+### 📥 Expected Response  Format
+<details>
+<summary>Click to expand</summary>
+
+```json
+{
+  "societyName": "society1",
+  "coConvenor": {
+    "name": "Harsh",
+    "imgurl": "https://example.com/harsh.png"
+  }
+}
+```
+</details>
+

@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
-import Society from '@/lib/models/Society';
+import '@/lib/models';
+import { Society } from '@/lib/models';
 import { convenorAuth } from '@/lib/middleware/convenorAuth';
 
 export async function POST(req: Request) {
+  // ADMIN or current CONVENOR only
   const auth = await convenorAuth(req);
   if (auth.error) {
     return NextResponse.json(
@@ -15,11 +17,18 @@ export async function POST(req: Request) {
   try {
     await connectDB();
 
-    const { societyName, name, imgurl } = await req.json();
+    const body = await req.json();
+    const { societyName, coConvenor } = body;
 
+    const { name, imgurl } = coConvenor || {};
+
+    //Validation
     if (!societyName || !name || !imgurl) {
       return NextResponse.json(
-        { message: 'societyName, name and imgurl are required' },
+        {
+          message:
+            'societyName and coConvenor (name, imgurl) are required'
+        },
         { status: 400 }
       );
     }
@@ -33,30 +42,14 @@ export async function POST(req: Request) {
       );
     }
 
-    // 🔐 Ensure current convenor
-    if (!society.currentConvenor.userId.equals(auth.userId)) {
-      return NextResponse.json(
-        { message: 'Forbidden: Not current convenor' },
-        { status: 403 }
-      );
-    }
+    //Tech is always derived from current convenor
+    const tech = society.currentConvenor.tech;
 
-    // ❌ Prevent duplicates
-    const exists = society.currentCoConvenors.some(
-      (cc: { name: any; }) => cc.name === name
-    );
-
-    if (exists) {
-      return NextResponse.json(
-        { message: 'Co-convenor already exists' },
-        { status: 409 }
-      );
-    }
-
+    // Add co-convenor 
     society.currentCoConvenors.push({
       name,
       imgurl,
-      tech: society.currentConvenor.tech
+      tech
     });
 
     await society.save();
@@ -64,7 +57,12 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         message: 'Co-convenor added successfully',
-        coConvenors: society.currentCoConvenors
+        society: society.name,
+        tech,
+        coConvenor: {
+          name,
+          imgurl
+        }
       },
       { status: 201 }
     );
