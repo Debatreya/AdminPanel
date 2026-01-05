@@ -217,3 +217,54 @@ Authenticate a user and issue a **JWT token** for protected routes.
 }
 ```
 </details>
+
+## API POST /api/user/add  
+Create or rotate a **Convenor** for a society.  
+> 🔒 **Admin-only route**  
+> - Creates user if not exists  
+> - Assigns as current convenor  
+> - Rotates previous convenor & co-convenors into history  
+
+---
+
+### 📥 Expected Request Format
+<details>
+<summary>Click to expand</summary>
+
+```json
+{
+  "name": "Harshit",
+  "rollno": "123103100",
+  "password": "secret123",
+  "imgurl": "https://example.com/harshit.png",
+  "societyName": "society1",
+  "tech": 2025,
+  "coConvenors": [
+    {
+      "name": "Aman",
+      "imgurl": "https://example.com/aman.png"
+    }
+  ]
+}
+```
+
+Note: password is required only if user does not already exist
+coConvenors is optional
+</details>
+
+### 📤 Expected Response Format
+<details> 
+<summary>Click to expand</summary>
+Society Created + Convenor Assigned (201)
+
+```json
+{
+  "message": "Society created and convenor assigned",
+  "society": "society1",
+  "convenor": {
+    "name": "Harshit",
+    "imgurl": "https://example.com/harshit.png"
+  },
+  "tech": 2025
+}
+```
