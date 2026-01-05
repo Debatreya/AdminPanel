@@ -22,6 +22,7 @@ To learn more about Next.js, take a look at the following resources:
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
 ## Project Structure
+```
 ├── app/                    # Next.js App Router
 │   ├── (auth)/            # Route groups for auth pages
 │   │   ├── login/
@@ -96,7 +97,7 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 │   └── constants.ts
 │
 └── middleware.ts        # Next.js middleware
-
+```
 ### Key Organizational Principles:
 1. App Directory (app)
 - Route Groups: Use (auth), (dashboard) for organizing routes without affecting URL structure
@@ -122,4 +123,61 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
+# API DOCUMENTATION 
+
+## API POST /api/user  
+Create a new user (ADMIN or CONVENOR). Used internally by admin workflows.
+> ⚠️ This route **only creates users**. Convenor assignment to a society is handled by `/api/user/add`.
+
+---
+
+### 📥 Expected Request Format
+<details>
+<summary>Click to expand</summary>
+
+#### Create ADMIN
+```json
+{
+  "name": "Admin User",
+  "rollno": "ADMIN01",
+  "password": "admin@123",
+  "role": "ADMIN",
+  "imgurl": "https://example.com/admin.png"
+
+}
+```
+or 
+#### Create Convenor (optional Not needed can be done by admin)
+
+````json
+{
+  "name": "Harshit",
+  "rollno": "123103100",
+  "password": "secret123",
+  "role": "CONVENOR",
+  "societyName": "society1",
+  "imgurl": "https://example.com/harshit.png"
+
+}
+````
+</details>
+
+
+### 📥 Expected Response  Format
+<details>
+<summary>Click to expand</summary>
+
+```json
+{
+    "message": "User created successfully",
+    "user": {
+        "id": "695b70f18d6e36dd4801401e",
+        "name": "AdminUser",
+        "rollno": "123103105",
+        "imgurl": "adminImageURL",
+        "role": "ADMIN"
+    }
+}
+````
+</details>
 

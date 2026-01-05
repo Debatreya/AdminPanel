@@ -23,6 +23,7 @@ export interface ISociety extends Document {
     userId: Types.ObjectId;
     name: string;
     tech: number;
+    imgurl: string;
   }>;
 
   // 🕰️ Co-convenor legacy
@@ -76,6 +77,7 @@ const SocietySchema = new Schema<ISociety>(
           required: true
         },
         name: { type: String, required: true },
+        imgurl: { type: String, required: true }, 
         tech: { type: Number, required: true }
       }
     ],

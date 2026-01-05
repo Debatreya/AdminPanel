@@ -14,6 +14,7 @@ export { default as Event } from './Event';
 export { default as Sponsor } from './Sponsor';
 export { default as Developer } from './Developer';
 export { default as Tag } from './Tag';
+export { default as User } from './User';
 
 export type { ISociety } from './Society';
 export type { ILecture } from './Lecture';

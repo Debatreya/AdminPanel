@@ -9,6 +9,7 @@ export interface IUser extends Document {
   password: string;
   role: USER_ROLE;
   societyName?: SOCIETY_NAMES;
+  imgurl: string; 
 }
 
 const UserSchema = new Schema<IUser>(
@@ -27,13 +28,19 @@ const UserSchema = new Schema<IUser>(
       required: true,
       select: false
     },
-
+    
+    
     role: {
       type: String,
       enum: ['ADMIN', 'CONVENOR'],
       required: true
     },
-
+    
+    
+    imgurl: {               
+      type: String,
+      required:true
+    },
     societyName: {
       type: String,
       enum: Object.values(SOCIETY_NAMES),

@@ -2,18 +2,30 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 
 import connectDB from '@/lib/db';
-import User from '@/lib/models/User';
+import '@/lib/models';                 
+import { User } from '@/lib/models';
 import { SOCIETY_NAMES } from '@/constants/enums';
 
-// CREATING A USER ADMIN/CONVENOR
+// CREATE USER (ADMIN / CONVENOR)
 export async function POST(req: Request) {
   try {
     await connectDB();
 
-    const { name, rollno, password, role, societyName } = await req.json();
+    let body;
+      try {
+        body = await req.json();
+      } catch {
+        return NextResponse.json(
+          { message: 'Invalid JSON body' },
+          { status: 400 }
+        );
+      }
 
-    // 🔹 Basic validation
-    if (!name || !rollno || !password || !role) {
+    const { name, rollno, password, role, societyName, imgurl } = body;
+
+
+    //Basic validation
+    if (!name || !rollno || !password || !role || !imgurl) {
       return NextResponse.json(
         { message: 'Missing required fields' },
         { status: 400 }
@@ -27,7 +39,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 🔹 Role-based rules
+    // Role-based rules
     if (role === 'CONVENOR') {
       if (!societyName) {
         return NextResponse.json(
@@ -51,7 +63,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 🔹 Prevent duplicate users
+    //Prevent duplicate users
     const existingUser = await User.findOne({ rollno });
     if (existingUser) {
       return NextResponse.json(
@@ -60,12 +72,13 @@ export async function POST(req: Request) {
       );
     }
 
-    // 🔐 Hash password explicitly
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
       name,
       rollno,
+      imgurl,                              
       password: hashedPassword,
       role,
       societyName: role === 'CONVENOR' ? societyName : undefined
@@ -78,6 +91,7 @@ export async function POST(req: Request) {
           id: user._id,
           name: user.name,
           rollno: user.rollno,
+          imgurl: user.imgurl,
           role: user.role,
           societyName: user.societyName
         }
