@@ -371,3 +371,105 @@ Add **one co-convenor** to a society.
 ```
 </details>
 
+## API GET /api/convenors  
+Fetch **society convenor and co-convenor details**.  
+> 🌐 **Public route**  
+> - Returns current convenor & co-convenors  
+> - Includes convenor & co-convenor history by default  
+> - History is grouped **year-wise (tech)**  
+
+---
+
+### 📥 Query Parameters
+<details>
+<summary>Click to expand</summary>
+
+| Param | Type | Required | Description |
+|------|------|----------|-------------|
+| societyName | string | ❌ | If provided, returns data for one society |
+| includeHistory | boolean | ❌ | Defaults to `true` |
+
+**Examples**
+/api/convenors
+/api/convenors?societyName=society1
+/api/convenors?societyName=society1&includeHistory=false
+
+</details>
+
+---
+
+### 📤 Expected Response Format
+<details>
+<summary>Click to expand</summary>
+
+#### Get ALL Societies (200)
+```json
+{
+  "societies": [
+    {
+      "id": "65fa123abc",
+      "name": "society1",
+      "logo": "https://example.com/logo.png",
+      "currentConvenor": {
+        "tech": 2025,
+        "user": {
+          "name": "Harshit",
+          "imgurl": "https://example.com/harshit.png"
+        }
+      },
+      "currentCoConvenors": [
+        {
+          "name": "Aman",
+          "imgurl": "https://example.com/aman.png",
+          "tech": 2025
+        }
+      ],
+      "convenorHistory": {
+        "2024": [
+          {
+            "name": "Rahul",
+            "imgurl": "https://example.com/rahul.png"
+          }
+        ]
+      },
+      "coConvenorHistory": {
+        "2024": [
+          {
+            "name": "Riya",
+            "imgurl": "https://example.com/riya.png"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+#### Get SINGLE Society (200)
+```json
+{
+  "society": {
+    "id": "65fa123abc",
+    "name": "society1",
+    "logo": "https://example.com/logo.png",
+    "currentConvenor": {
+      "tech": 2025,
+      "user": {
+        "name": "Harshit",
+        "imgurl": "https://example.com/harshit.png"
+      }
+    },
+    "currentCoConvenors": [],
+    "convenorHistory": {
+      "2024": [
+        {
+          "name": "Rahul",
+          "imgurl": "https://example.com/rahul.png"
+        }
+      ]
+    },
+    "coConvenorHistory": {}
+  }
+}
+```
+</details>
