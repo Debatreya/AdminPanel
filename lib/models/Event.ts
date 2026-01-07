@@ -1,31 +1,36 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { SOCIETY_NAMES } from '../../constants/enums';
 
 export interface IEvent extends Document {
-  societyId: string;
+  society: mongoose.Types.ObjectId;
+  societyName: SOCIETY_NAMES;
   events: Array<{
-    id: string;
     imgurl: string;
   }>;
 }
 
-const EventSchema: Schema = new Schema({
-  societyId: {
-    type: String,
+const EventSchema = new Schema<IEvent>({
+  society: {
+    type: Schema.Types.ObjectId,
+    ref: 'Society',
     required: true,
-    ref: 'Society'
+    index: true
   },
+
+  societyName: {
+    type: String,
+    enum: Object.values(SOCIETY_NAMES),
+    required: true,
+    index: true
+  },
+
   events: [{
-    id: {
-      type: String,
-      required: true
-    },
     imgurl: {
       type: String,
       required: true
     }
   }]
-}, {
-  timestamps: true
-});
+}, { timestamps: true });
 
-export default mongoose.models.Event || mongoose.model<IEvent>('Event', EventSchema);
+export default mongoose.models.Event ||
+  mongoose.model<IEvent>('Event', EventSchema);

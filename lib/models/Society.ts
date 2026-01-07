@@ -1,78 +1,97 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { YEAR_LEVELS } from '../../constants/enums';
+import mongoose, { Schema, Document, Types } from 'mongoose';
+import { SOCIETY_NAMES } from '../../constants/enums';
 
 export interface ISociety extends Document {
-  societyID: string;
-  convenor: {
-    year: YEAR_LEVELS;
-    name: string;
-    rollno: string;
-    password: string;
-    imgurl: string;
-  };
-  coConvenors: Array<{
-    id: string;
-    name: string;
-    imgurl: string;
-    year: YEAR_LEVELS;
-  }>;
+  name: SOCIETY_NAMES;   // fixed enum
   logo: string;
+
+  // 🔒 Active convenor (authority)
+  currentConvenor: {
+    userId: Types.ObjectId;
+    tech: number;        // e.g. 2024
+  };
+
+  // 👥 Active co-convenors (display only)
+  currentCoConvenors: Array<{
+    name: string;
+    imgurl: string;
+    tech: number;
+  }>;
+
+  // 🕰️ Convenor legacy
+  convenorHistory: Array<{
+    userId: Types.ObjectId;
+    name: string;
+    tech: number;
+    imgurl: string;
+  }>;
+
+  // 🕰️ Co-convenor legacy
+  coConvenorHistory: Array<{
+    name: string;
+    imgurl: string;
+    tech: number;
+  }>;
 }
 
-const SocietySchema: Schema = new Schema({
-  societyID: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  convenor: {
-    year: {
-      type: String,
-      enum: Object.values(YEAR_LEVELS),
-      required: true
-    },
+const SocietySchema = new Schema<ISociety>(
+  {
     name: {
       type: String,
-      required: true
+      enum: Object.values(SOCIETY_NAMES),
+      required: true,
+      unique: true,
+      index: true
     },
-    rollno: {
-      type: String,
-      required: true
-    },
-    password: {
-      type: String,
-      required: true
-    },
-    imgurl: {
-      type: String,
-      required: true
-    }
-  },
-  coConvenors: [{
-    id: {
-      type: String,
-      required: true
-    },
-    name: {
-      type: String,
-      required: true
-    },
-    imgurl: {
-      type: String,
-      required: true
-    },
-    year: {
-      type: String,
-      enum: Object.values(YEAR_LEVELS),
-      required: true
-    }
-  }],
-  logo: {
-    type: String,
-    required: true
-  }
-}, {
-  timestamps: true
-});
 
-export default mongoose.models.Society || mongoose.model<ISociety>('Society', SocietySchema);
+    logo: {
+      type: String,
+      required: true
+    },
+
+    currentConvenor: {
+      userId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+      },
+      tech: {
+        type: Number,
+        required: true
+      }
+    },
+
+    currentCoConvenors: [
+      {
+        name: { type: String, required: true },
+        imgurl: { type: String, required: true },
+        tech: { type: Number, required: true }
+      }
+    ],
+
+    convenorHistory: [
+      {
+        userId: {
+          type: Schema.Types.ObjectId,
+          ref: 'User',
+          required: true
+        },
+        name: { type: String, required: true },
+        imgurl: { type: String, required: true }, 
+        tech: { type: Number, required: true }
+      }
+    ],
+
+    coConvenorHistory: [
+      {
+        name: { type: String, required: true },
+        imgurl: { type: String, required: true },
+        tech: { type: Number, required: true }
+      }
+    ]
+  },
+  { timestamps: true }
+);
+
+export default mongoose.models.Society ||
+  mongoose.model<ISociety>('Society', SocietySchema);

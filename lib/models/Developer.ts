@@ -1,11 +1,12 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { YEAR_LEVELS } from '../../constants/enums';
+import { YEAR_LEVELS ,DEVELOPER_ROLES} from '../../constants/enums';
 
 export interface IDeveloper extends Document {
   id: string;
   name: string;
   imgURL: string;
   year: YEAR_LEVELS;
+  role: DEVELOPER_ROLES;
   github: string;
   insta: string;
   linkedin: string;
@@ -28,6 +29,11 @@ const DeveloperSchema: Schema = new Schema({
   year: {
     type: String,
     enum: Object.values(YEAR_LEVELS),
+    required: true
+  },
+  role: {
+    type: String,
+    enum: Object.values(DEVELOPER_ROLES),
     required: true
   },
   github: {

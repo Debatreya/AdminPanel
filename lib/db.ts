@@ -3,43 +3,53 @@ import mongoose from 'mongoose';
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
+  throw new Error(
+    'Please define the MONGODB_URI environment variable inside .env.local'
+  );
 }
 
 /**
- * Global is used here to maintain a cached connection across hot reloads
- * in development. This prevents connections growing exponentially
- * during API Route usage.
+ * Extend global object for mongoose caching
+ * (prevents multiple connections in Next.js dev mode)
  */
+declare global {
+  // eslint-disable-next-line no-var
+  var mongoose: {
+    conn: mongoose.Mongoose | null;
+    promise: Promise<mongoose.Mongoose> | null;
+  } | undefined;
+}
+
 let cached = global.mongoose;
 
 if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
+  cached = global.mongoose = {
+    conn: null,
+    promise: null
+  };
 }
 
-async function connectDB() {
-  if (cached.conn) {
-    return cached.conn;
+async function connectDB(): Promise<mongoose.Mongoose> {
+  // Reuse existing connection
+  if (cached!.conn) {
+    return cached!.conn;
   }
 
-  // if (!cached.promise) {
-  //   const opts = {
-  //     bufferCommands: false,
-  //   };
-
-  //   cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
-  //     return mongoose;
-  //   });
-  // }
+  // Create new connection if needed
+  if (!cached!.promise) {
+    cached!.promise = mongoose.connect(MONGODB_URI!, {
+      bufferCommands: false
+    });
+  }
 
   try {
-    cached.conn = await cached.promise;
-  } catch (e) {
-    cached.promise = null;
-    throw e;
+    cached!.conn = await cached!.promise;
+  } catch (error) {
+    cached!.promise = null;
+    throw error;
   }
 
-  return cached.conn;
+  return cached!.conn;
 }
 
 export default connectDB;

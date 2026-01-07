@@ -1,31 +1,36 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { SPONSOR_TYPES } from '../../constants/enums';
+import { SPONSOR_TYPES, SOCIETY_NAMES } from '../../constants/enums';
 
 export interface ISponsor extends Document {
   sponsorType: SPONSOR_TYPES;
+
   sponsors: Array<{
-    id: string;
-    societyId: string;
+    society: mongoose.Types.ObjectId;
+    societyName: SOCIETY_NAMES;
     imgurl: string;
     title: string;
   }>;
 }
 
-const SponsorSchema: Schema = new Schema({
+const SponsorSchema = new Schema<ISponsor>({
   sponsorType: {
     type: String,
     enum: Object.values(SPONSOR_TYPES),
-    required: true
+    required: true,
+    index: true
   },
+
   sponsors: [{
-    id: {
-      type: String,
+    society: {
+      type: Schema.Types.ObjectId,
+      ref: 'Society',
       required: true
     },
-    societyId: {
+    societyName: {
       type: String,
+      enum: Object.values(SOCIETY_NAMES),
       required: true,
-      ref: 'Society'
+      index: true
     },
     imgurl: {
       type: String,
@@ -36,8 +41,7 @@ const SponsorSchema: Schema = new Schema({
       required: true
     }
   }]
-}, {
-  timestamps: true
-});
+}, { timestamps: true });
 
-export default mongoose.models.Sponsor || mongoose.model<ISponsor>('Sponsor', SponsorSchema);
+export default mongoose.models.Sponsor ||
+  mongoose.model<ISponsor>('Sponsor', SponsorSchema);

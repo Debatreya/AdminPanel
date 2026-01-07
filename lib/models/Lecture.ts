@@ -1,31 +1,36 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { SOCIETY_NAMES } from '../../constants/enums';
 
 export interface ILecture extends Document {
-  societyId: string;
+  society: mongoose.Types.ObjectId;
+  societyName: SOCIETY_NAMES;
   lectures: Array<{
-    id: string;
     imgurl: string;
   }>;
 }
 
-const LectureSchema: Schema = new Schema({
-  societyId: {
-    type: String,
+const LectureSchema = new Schema<ILecture>({
+  society: {
+    type: Schema.Types.ObjectId,
+    ref: 'Society',
     required: true,
-    ref: 'Society'
+    index: true
   },
+
+  societyName: {
+    type: String,
+    enum: Object.values(SOCIETY_NAMES),
+    required: true,
+    index: true
+  },
+
   lectures: [{
-    id: {
-      type: String,
-      required: true
-    },
     imgurl: {
       type: String,
       required: true
     }
   }]
-}, {
-  timestamps: true
-});
+}, { timestamps: true });
 
-export default mongoose.models.Lecture || mongoose.model<ILecture>('Lecture', LectureSchema);
+export default mongoose.models.Lecture ||
+  mongoose.model<ILecture>('Lecture', LectureSchema);
