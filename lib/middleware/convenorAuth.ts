@@ -11,7 +11,7 @@ interface AuthResult {
   status?: number;
 }
 
-export async function convenorAuth(
+export default async function convenorAuth(
   req: Request
 ): Promise<AuthResult> {
   try {

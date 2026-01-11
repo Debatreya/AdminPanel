@@ -2,10 +2,9 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 
 import connectDB from '@/lib/db';
-import Society from '@/lib/models/Society';
 import '@/lib/models';
-import User from '@/lib/models/User';
-import { SOCIETY_NAMES,YEAR_LEVELS } from '@/constants';
+import { Society, User } from '@/lib/models';
+import { SOCIETY_NAMES, YEAR_LEVELS } from '@/constants';
 
 function groupByTechSorted<T extends { tech: number }>(items: T[]) {
   const grouped = items.reduce<Record<number, T[]>>((acc, item) => {

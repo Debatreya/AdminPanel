@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
-export async function adminAuth(req: Request) {
+export default async function adminAuth(req: Request) {
   const authHeader = req.headers.get('authorization');
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
