@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import '@/lib/models';
 import { Society } from '@/lib/models';
-import { convenorAuth } from '@/lib/middleware/convenorAuth';
+import { convenorAuth } from '@/lib/middleware';
 
 export async function POST(req: Request) {
   // ADMIN or current CONVENOR only

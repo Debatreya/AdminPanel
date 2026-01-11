@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 import connectDB from '@/lib/db';
-import User from '@/lib/models/User';
+import { User } from '@/lib/models';
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 

@@ -4,7 +4,7 @@ import connectDB from '@/lib/db';
 import '@/lib/models';
 import { Society, User } from '@/lib/models';
 import { SOCIETY_NAMES } from '@/constants/enums';
-import { adminAuth } from '@/lib/middleware/adminAuth';
+import { adminAuth } from '@/lib/middleware';
 
 export async function POST(req: Request) {
   // 🔒 Admin protection
