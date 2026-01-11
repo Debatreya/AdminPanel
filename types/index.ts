@@ -3,3 +3,5 @@ export * from './api';
 export * from './auth';
 export * from './common';
 export * from './imgbb';
+export * from './dto/faq';
+export * from './dto/developer';
