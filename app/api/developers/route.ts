@@ -17,10 +17,10 @@ const VALID_YEARS = new Set<string>(Object.values(YEAR_LEVELS))
 const VALID_ROLES = new Set<string>(Object.values(DEVELOPER_ROLES))
 
 function formatDeveloper(doc: any): DeveloperResponse {
-  const obj = doc?.toObject ? doc.toObject() : doc
+  const obj = doc?.toObject ? doc.toObject() : doc;
+
   return {
-    _id: obj._id?.toString?.() ?? obj._id,
-    id: obj.id,
+    id: obj._id?.toString?.() ?? obj._id, // ✅ alias
     name: obj.name,
     imgURL: obj.imgURL,
     year: obj.year,
@@ -28,9 +28,15 @@ function formatDeveloper(doc: any): DeveloperResponse {
     github: obj.github,
     insta: obj.insta,
     linkedin: obj.linkedin,
-    createdAt: obj.createdAt instanceof Date ? obj.createdAt.toISOString() : obj.createdAt,
-    updatedAt: obj.updatedAt instanceof Date ? obj.updatedAt.toISOString() : obj.updatedAt,
-  }
+    createdAt:
+      obj.createdAt instanceof Date
+        ? obj.createdAt.toISOString()
+        : obj.createdAt,
+    updatedAt:
+      obj.updatedAt instanceof Date
+        ? obj.updatedAt.toISOString()
+        : obj.updatedAt
+  };
 }
 
 // GET /api/developers - Get all developers
@@ -60,87 +66,81 @@ export async function GET(_request: Request) {
 // POST /api/developers - Create new developer
 export async function POST(request: Request) {
   // 🔒 Admin protection
-  const authResponse = await adminAuth(request)
-  if (authResponse) return authResponse
+  const authResponse = await adminAuth(request);
+  if (authResponse) return authResponse;
 
   try {
-    await connectDB()
+    await connectDB();
 
-    let body: CreateDeveloperRequest
+    let body;
     try {
-      body = await request.json()
+      body = await request.json();
     } catch {
-        return NextResponse.json<DeveloperErrorResponse>(
+      return NextResponse.json(
         { message: 'Invalid JSON body' },
         { status: 400 }
-      )
+      );
     }
 
-    const { developer } = body || {}
+    const { developer } = body || {};
 
     if (!developer || typeof developer !== 'object') {
-      return NextResponse.json<DeveloperErrorResponse>(
+      return NextResponse.json(
         { message: 'developer payload is required' },
         { status: 400 }
-      )
+      );
     }
 
-    const { id, name, imgURL, year, role, github, insta, linkedin } = developer
+    const { name, imgURL, year, role, github, insta, linkedin } = developer;
 
-    if (!id || !name || !imgURL || !year || !role || !github || !insta || !linkedin) {
-      return NextResponse.json<DeveloperErrorResponse>(
-        { message: 'All fields (id, name, imgURL, year, role, github, insta, linkedin) are required' },
+    // 🔹 Validation
+    if (!name || !imgURL || !year || !role || !github || !insta || !linkedin) {
+      return NextResponse.json(
+        {
+          message:
+            'All fields (name, imgURL, year, role, github, insta, linkedin) are required'
+        },
         { status: 400 }
-      )
+      );
     }
 
-    if (!VALID_YEARS.has(year)) {
-      return NextResponse.json<DeveloperErrorResponse>(
+    if (!Object.values(YEAR_LEVELS).includes(year)) {
+      return NextResponse.json(
         { message: 'Invalid year value' },
         { status: 400 }
-      )
+      );
     }
 
-    if (!VALID_ROLES.has(role)) {
-      return NextResponse.json<DeveloperErrorResponse>(
+    if (!Object.values(DEVELOPER_ROLES).includes(role)) {
+      return NextResponse.json(
         { message: 'Invalid role value' },
         { status: 400 }
-      )
-    }
-
-    // Prevent duplicate developer IDs
-    const existing = await Developer.findOne({ id })
-    if (existing) {
-      return NextResponse.json<DeveloperErrorResponse>(
-        { message: 'Developer already exists with this id' },
-        { status: 409 }
-      )
+      );
     }
 
     const newDeveloper = await Developer.create({
-      id,
       name,
       imgURL,
       year,
       role,
       github,
       insta,
-      linkedin,
-    })
+      linkedin
+    });
 
-    return NextResponse.json<CreateDeveloperResponse>(
+    return NextResponse.json(
       {
         success: true,
         message: 'Developer created successfully',
-        data: formatDeveloper(newDeveloper),
+        data: formatDeveloper(newDeveloper)
       },
       { status: 201 }
-    )
+    );
   } catch (error) {
-    console.error('Error creating developer:', error)
-    return NextResponse.json<DeveloperErrorResponse>(
+    console.error('Error creating developer:', error);
+    return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }
-    )
+    );
   }
 }

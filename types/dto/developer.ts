@@ -2,7 +2,6 @@ import type { YEAR_LEVELS, DEVELOPER_ROLES } from '@/constants/enums';
 
 // Shared
 export interface DeveloperPayload {
-  id: string;
   name: string;
   imgURL: string;
   year: YEAR_LEVELS;
@@ -12,18 +11,19 @@ export interface DeveloperPayload {
   linkedin: string;
 }
 
+
 // Request DTOs
 export interface CreateDeveloperRequest {
   developer: DeveloperPayload;
 }
 
 export interface UpdateDeveloperRequest {
-  developer: Partial<Omit<DeveloperPayload, 'id'>>;
+  developer: Partial<DeveloperPayload>;
 }
 
 // Response DTOs
 export interface DeveloperResponse extends DeveloperPayload {
-  _id: string;
+  id: string;
   createdAt: string;
   updatedAt: string;
 }
