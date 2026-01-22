@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     const tech = society.currentConvenor.tech;
 
     // 🔁 Move existing co-convenors to history
-    society.currentCoConvenors.forEach((cc) => {
+    society.currentCoConvenors.forEach((cc: { name: any; imgurl: any; tech: any; }) => {
       society.coConvenorHistory.push({
         name: cc.name,
         imgurl: cc.imgurl,

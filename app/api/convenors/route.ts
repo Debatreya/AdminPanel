@@ -22,8 +22,12 @@ function groupByTechSorted<T extends { tech: number }>(items: T[]) {
 
 
 
-// GET /api/convenors - Get all convenors of a all societies/particular society 
-
+/**
+ * GET /api/convenors
+ * Query params:
+ * - societyName (optional)
+ * - includeHistory (default: true)
+ */
 export async function GET(req: Request) {
   try {
     await connectDB();
@@ -31,17 +35,21 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const societyName = searchParams.get('societyName');
 
-    // ✅ history enabled by default
+    // history enabled by default
     const includeHistory = searchParams.get('includeHistory') !== 'false';
 
-    // 🔹 CASE 1: ALL societies
+    /**
+     * 🔹 CASE 1: ALL societies
+     */
     if (!societyName) {
-      const societies = await Society.find({})
-        .populate('currentConvenor.userId', 'name imgurl')
-        .populate(
-          includeHistory ? 'convenorHistory.userId' : '',
-          'name imgurl'
-        );
+      let query = Society.find({})
+        .populate('currentConvenor.userId', 'name imgurl');
+
+      if (includeHistory) {
+        query = query.populate('convenorHistory.userId', 'name imgurl');
+      }
+
+      const societies = await query;
 
       return NextResponse.json(
         {
@@ -79,20 +87,24 @@ export async function GET(req: Request) {
       );
     }
 
-    // 🔹 CASE 2: Single society
-    if (!Object.values(SOCIETY_NAMES).includes(societyName as SOCIETY_NAMES)) {
+    /**
+     * 🔹 CASE 2: Single society
+     */
+    if (!Object.values(SOCIETY_NAMES).includes(societyName as any)) {
       return NextResponse.json(
         { message: 'Invalid society name' },
         { status: 400 }
       );
     }
 
-    const society = await Society.findOne({ name: societyName })
-      .populate('currentConvenor.userId', 'name imgurl')
-      .populate(
-        includeHistory ? 'convenorHistory.userId' : '',
-        'name imgurl'
-      );
+    let query = Society.findOne({ name: societyName })
+      .populate('currentConvenor.userId', 'name imgurl');
+
+    if (includeHistory) {
+      query = query.populate('convenorHistory.userId', 'name imgurl');
+    }
+
+    const society = await query;
 
     if (!society) {
       return NextResponse.json(
@@ -127,7 +139,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ society: response }, { status: 200 });
   } catch (error) {
-    console.error(error);
+    console.error('GET /api/convenors error:', error);
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }

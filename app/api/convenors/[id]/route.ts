@@ -1,23 +1,163 @@
-// GET /api/convenors/[id] - Get specific convenor
+import { NextResponse } from 'next/server';
+import connectDB from '@/lib/db';
+import '@/lib/models';
+import { User } from '@/lib/models';
+import { convenorAuth } from '@/lib/middleware';
+import bcrypt from 'bcryptjs';
+
+/**
+ * GET /api/convenors/[id]
+ * Public – fetch specific convenor details
+ */
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  // Get specific convenor logic will go here
+  try {
+    const { id } = await context.params; // ✅ FIX
+
+    await connectDB();
+
+    const convenor = await User.findById(id).select(
+      'name rollno imgurl role societyName'
+    );
+
+    if (!convenor || convenor.role !== 'CONVENOR') {
+      return NextResponse.json(
+        { message: 'Convenor not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ convenor }, { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { message: 'Internal server error' },
+      { status: 500 }
+    );
+  }
 }
 
-// DELETE /api/convenors/[id] - Delete convenor
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
-  // Delete convenor logic will go here
-}
-
-// PATCH /api/convenors/[id] - Update convenor
+/**
+ * PATCH /api/convenors/[id]
+ * ADMIN or same CONVENOR – update convenor profile
+ */
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  // Update convenor logic will go here
+  const auth = await convenorAuth(request);
+  if (auth.error) {
+    return NextResponse.json(
+      { message: auth.error },
+      { status: auth.status }
+    );
+  }
+
+  const { id } = await context.params; // ✅ FIX
+
+  // 🔐 Only ADMIN or same CONVENOR
+  if (auth.role !== 'ADMIN' && auth.userId !== id) {
+    return NextResponse.json(
+      { message: 'Forbidden' },
+      { status: 403 }
+    );
+  }
+
+  try {
+    await connectDB();
+
+    const { name, imgurl, password } = await request.json();
+
+    const convenor = await User.findById(id);
+
+    if (!convenor || convenor.role !== 'CONVENOR') {
+      return NextResponse.json(
+        { message: 'Convenor not found' },
+        { status: 404 }
+      );
+    }
+
+    if (name) convenor.name = name;
+    if (imgurl) convenor.imgurl = imgurl;
+
+    if (password) {
+      convenor.password = await bcrypt.hash(password, 10);
+    }
+
+    await convenor.save();
+
+    return NextResponse.json(
+      {
+        message: 'Convenor updated successfully',
+        convenor: {
+          id: convenor._id,
+          name: convenor.name,
+          imgurl: convenor.imgurl,
+          societyName: convenor.societyName
+        }
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { message: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * DELETE /api/convenors/[id]
+ * ADMIN only – remove convenor role (preserves history)
+ */
+export async function DELETE(
+  request: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  const auth = await convenorAuth(request);
+  if (auth.error) {
+    return NextResponse.json(
+      { message: auth.error },
+      { status: auth.status }
+    );
+  }
+
+  if (auth.role !== 'ADMIN') {
+    return NextResponse.json(
+      { message: 'Only admin can delete convenors' },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const { id } = await context.params; // ✅ FIX
+
+    await connectDB();
+
+    const convenor = await User.findById(id);
+
+    if (!convenor || convenor.role !== 'CONVENOR') {
+      return NextResponse.json(
+        { message: 'Convenor not found' },
+        { status: 404 }
+      );
+    }
+
+    // ❗ Preserve history – only remove user
+    await User.findByIdAndDelete(id);
+
+    return NextResponse.json(
+      { message: 'Convenor deleted successfully' },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { message: 'Internal server error' },
+      { status: 500 }
+    );
+  }
 }

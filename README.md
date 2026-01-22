@@ -270,12 +270,13 @@ Society Created + Convenor Assigned (201)
 ```
 </details>
 
-## API POST /api/convenors/co-convenors/all  
+## API POST /api/convenors/co-convenors 
 Replace **all current co-convenors** of a society in one operation.  
+
 > 🔒 **Accessible by ADMIN or current CONVENOR of the society**  
 > - Clears existing co-convenors  
 > - Moves them to history  
-> - Sets a fresh list for the given tech year  
+> - Sets a fresh list for the **current tech year (derived automatically)**  
 
 ---
 
@@ -286,7 +287,6 @@ Replace **all current co-convenors** of a society in one operation.
 ```json
 {
   "societyName": "society1",
-  "tech": 2025,
   "coConvenors": [
     {
       "name": "Aman",
@@ -300,50 +300,51 @@ Replace **all current co-convenors** of a society in one operation.
 }
 ```
 
-- **Notes**
-  - Co-Convenors Must be provided as a complete replacement list
-  - Existing co-convenors are automatically moved to history
+Notes
+- tech is not accepted from client
+- Tech is derived from the current convenor
+- Existing co-convenors are automatically moved to history
 </details>
 
-### 📤 Expected Response Format
+📤 Expected Response Format
 <details> <summary>Click to expand</summary>
 
 ```json
 {
-    "message": "Co-convenors updated successfully",
-    "society": "society1",
-    "tech": 2026,
-    "coConvenors": [
-        {
-            "name": "Shobita",
-            "imgurl": "https://example.com/aman.png",
-            "tech": 2026,
-            "_id": "695b7bdb03cc75ae179842c9"
-        },
-        {
-            "name": "Yash",
-            "imgurl": "https://example.com/riya.png",
-            "tech": 2026,
-            "_id": "695b7bdb03cc75ae179842ca"
-        }
-    ]
+  "message": "Co-convenors updated successfully",
+  "society": "society1",
+  "tech": 2026,
+  "coConvenors": [
+    {
+      "_id": "695b7bdb03cc75ae179842c9",
+      "name": "Shobita",
+      "imgurl": "https://example.com/aman.png",
+      "tech": 2026
+    },
+    {
+      "_id": "695b7bdb03cc75ae179842ca",
+      "name": "Yash",
+      "imgurl": "https://example.com/riya.png",
+      "tech": 2026
+    }
+  ]
 }
 ```
 </details>
 
-## API POST /api/convenors/co-convenors  
-Add **one co-convenor** to a society.  
+# API PATCH /api/convenors/co-convenors
+Add or edit a single co-convenor of a society.
 
-> 🔒 Accessible by **ADMIN** or **current CONVENOR** of the society  
-> - Appends a single co-convenor  
-> - Does NOT affect existing co-convenors  
-> - Does NOT modify history  
+🔒 Accessible by ADMIN or current CONVENOR of the society
 
----
+Add: appends one co-convenor
 
-### 📥 Expected Request Format
-<details>
-<summary>Click to expand</summary>
+Edit: updates an existing co-convenor using coConvenorId
+
+Does NOT touch history
+
+📥 Expected Request Format (ADD)
+<details> <summary>Click to expand</summary>
 
 ```json
 {
@@ -355,21 +356,40 @@ Add **one co-convenor** to a society.
 }
 ```
 </details>
-
-### 📥 Expected Response  Format
-<details>
-<summary>Click to expand</summary>
+📥 Expected Request Format (EDIT)
+<details> <summary>Click to expand</summary>
 
 ```json
 {
   "societyName": "society1",
+  "coConvenorId": "695b7bdb03cc75ae179842c9",
   "coConvenor": {
-    "name": "Harsh",
-    "imgurl": "https://example.com/harsh.png"
+    "name": "Harsh Updated",
+    "imgurl": "https://example.com/harsh-new.png"
   }
 }
 ```
 </details>
+📤 Expected Response Format
+<details> <summary>Click to expand</summary>
+
+```json
+{
+  "message": "Co-convenor added successfully",
+  "society": "society1",
+  "tech": 2026,
+  "coConvenors": [
+    {
+      "_id": "695b7bdb03cc75ae179842c9",
+      "name": "Harsh",
+      "imgurl": "https://example.com/harsh.png",
+      "tech": 2026
+    }
+  ]
+}
+```
+</details> 
+
 
 ## API GET /api/convenors  
 Fetch **society convenor and co-convenor details**.  
