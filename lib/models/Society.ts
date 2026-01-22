@@ -13,6 +13,7 @@ export interface ISociety extends Document {
 
   // 👥 Active co-convenors (display only)
   currentCoConvenors: Array<{
+    _id: Types.ObjectId;
     name: string;
     imgurl: string;
     tech: number;
@@ -63,6 +64,10 @@ const SocietySchema = new Schema<ISociety>(
 
     currentCoConvenors: [
       {
+         _id: {
+          type: Schema.Types.ObjectId,
+          auto: true      
+        },
         name: { type: String, required: true },
         imgurl: { type: String, required: true },
         tech: { type: Number, required: true }
