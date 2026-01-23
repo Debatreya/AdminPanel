@@ -1,26 +1,11 @@
 import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
-
 import connectDB from '@/lib/db';
 import '@/lib/models';
-import { Society, User } from '@/lib/models';
-import { SOCIETY_NAMES, YEAR_LEVELS } from '@/constants';
-
-function groupByTechSorted<T extends { tech: number }>(items: T[]) {
-  const grouped = items.reduce<Record<number, T[]>>((acc, item) => {
-    if (!acc[item.tech]) acc[item.tech] = [];
-    acc[item.tech].push(item);
-    return acc;
-  }, {});
-
-  return Object.fromEntries(
-    Object.entries(grouped).sort(
-      ([a], [b]) => Number(b) - Number(a)
-    )
-  );
-}
-
-
+import { Society} from '@/lib/models';
+import { SOCIETY_NAMES} from '@/constants';
+import {
+  formatSocietyConvenors,
+} from '@/lib/formatters/convenor';
 
 /**
  * GET /api/convenors
@@ -38,9 +23,7 @@ export async function GET(req: Request) {
     // history enabled by default
     const includeHistory = searchParams.get('includeHistory') !== 'false';
 
-    /**
-     * 🔹 CASE 1: ALL societies
-     */
+    //  CASE 1: ALL societies
     if (!societyName) {
       let query = Society.find({})
         .populate('currentConvenor.userId', 'name imgurl');
@@ -51,45 +34,23 @@ export async function GET(req: Request) {
 
       const societies = await query;
 
-      return NextResponse.json(
-        {
-          societies: societies.map((society) => {
-            const base = {
-              id: society._id,
-              name: society.name,
-              logo: society.logo,
-              currentConvenor: {
-                tech: society.currentConvenor.tech,
-                user: society.currentConvenor.userId
-              },
-              currentCoConvenors: society.currentCoConvenors
-            };
+      const data = societies.map((society) =>
+            formatSocietyConvenors(
+              society,
+              society.currentConvenor.userId,
+              includeHistory
+            )
+          );
 
-            if (includeHistory) {
-              return {
-                ...base,
-                convenorHistory: groupByTechSorted(
-                  society.convenorHistory.map((c: { userId: any; tech: any; }) => ({
-                    user: c.userId,
-                    tech: c.tech
-                  }))
-                ),
-                coConvenorHistory: groupByTechSorted(
-                  society.coConvenorHistory
-                )
-              };
-            }
-
-            return base;
-          })
-        },
-        { status: 200 }
-      );
+          return NextResponse.json(
+            {
+              success: true,
+              data,
+            },
+            { status: 200 }
+          );
     }
-
-    /**
-     * 🔹 CASE 2: Single society
-     */
+    //  CASE 2: Single society
     if (!Object.values(SOCIETY_NAMES).includes(societyName as any)) {
       return NextResponse.json(
         { message: 'Invalid society name' },
@@ -113,32 +74,21 @@ export async function GET(req: Request) {
       );
     }
 
-    const response: any = {
-      id: society._id,
-      name: society.name,
-      logo: society.logo,
-      currentConvenor: {
-        tech: society.currentConvenor.tech,
-        user: society.currentConvenor.userId
+    const data = formatSocietyConvenors(
+      society,
+      society.currentConvenor.userId,
+      includeHistory
+    );
+
+
+return NextResponse.json(
+      {
+        success: true,
+        data,
       },
-      currentCoConvenors: society.currentCoConvenors
-    };
-
-    if (includeHistory) {
-      response.convenorHistory = groupByTechSorted(
-        society.convenorHistory.map((c: { userId: any; tech: any; }) => ({
-          user: c.userId,
-          tech: c.tech
-        }))
-      );
-
-      response.coConvenorHistory = groupByTechSorted(
-        society.coConvenorHistory
-      );
-    }
-
-    return NextResponse.json({ society: response }, { status: 200 });
-  } catch (error) {
+      { status: 200 }
+    );
+    } catch (error) {
     console.error('GET /api/convenors error:', error);
     return NextResponse.json(
       { message: 'Internal server error' },
