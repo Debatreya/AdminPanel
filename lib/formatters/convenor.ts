@@ -28,7 +28,7 @@ export function formatConvenor(
     id: user._id.toString(),
     name: user.name,
     imgurl: user.imgurl,
-    tech,
+    tech: user.tech??0,
   };
 }
 

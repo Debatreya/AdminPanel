@@ -1,9 +1,17 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import '@/lib/models';
-import { User } from '@/lib/models';
+import { Society,User } from '@/lib/models';
 import { convenorAuth } from '@/lib/middleware';
 import bcrypt from 'bcryptjs';
+import type {
+  GetSingleConvenorResponse,
+  ConvenorActionResponse,
+  ConvenorErrorResponse,
+} from '@/types/dto/convenor';
+import {
+  formatSocietyConvenors
+} from '@/lib/formatters/convenor';
 
 /**
  * GET /api/convenors/[id]
@@ -14,7 +22,7 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await context.params; // ✅ FIX
+    const { id } = await context.params;
 
     await connectDB();
 
@@ -23,16 +31,39 @@ export async function GET(
     );
 
     if (!convenor || convenor.role !== 'CONVENOR') {
-      return NextResponse.json(
+      return NextResponse.json<ConvenorErrorResponse>(
         { message: 'Convenor not found' },
         { status: 404 }
       );
     }
+     const society = await Society.findOne({ name: convenor.societyName })
+      .populate('currentConvenor.userId', 'name imgurl')
+      .populate('convenorHistory.userId', 'name imgurl');
 
-    return NextResponse.json({ convenor }, { status: 200 });
+    if (!society) {
+      return NextResponse.json<ConvenorErrorResponse>(
+        { message: 'Society not found' },
+        { status: 404 }
+      );
+    }
+
+    // 3️⃣ Format via shared formatter
+    const data = formatSocietyConvenors(
+      society,
+      society.currentConvenor.userId,
+      true
+    );
+
+      return NextResponse.json<GetSingleConvenorResponse>(
+      {
+        success: true,
+        data,
+      },
+      { status: 200 }
+    );
   } catch (error) {
-    console.error(error);
-    return NextResponse.json(
+  console.error('GET /api/convenors/[id] error:', error);
+    return NextResponse.json<ConvenorErrorResponse>(
       { message: 'Internal server error' },
       { status: 500 }
     );
