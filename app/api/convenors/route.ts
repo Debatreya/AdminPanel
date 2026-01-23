@@ -1,29 +1,18 @@
 import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
-
 import connectDB from '@/lib/db';
 import '@/lib/models';
-import { Society, User } from '@/lib/models';
-import { SOCIETY_NAMES, YEAR_LEVELS } from '@/constants';
+import { Society} from '@/lib/models';
+import { SOCIETY_NAMES} from '@/constants';
+import {
+  formatSocietyConvenors,
+} from '@/lib/formatters/convenor';
 
-function groupByTechSorted<T extends { tech: number }>(items: T[]) {
-  const grouped = items.reduce<Record<number, T[]>>((acc, item) => {
-    if (!acc[item.tech]) acc[item.tech] = [];
-    acc[item.tech].push(item);
-    return acc;
-  }, {});
-
-  return Object.fromEntries(
-    Object.entries(grouped).sort(
-      ([a], [b]) => Number(b) - Number(a)
-    )
-  );
-}
-
-
-
-// GET /api/convenors - Get all convenors of a all societies/particular society 
-
+/**
+ * GET /api/convenors
+ * Query params:
+ * - societyName (optional)
+ * - includeHistory (default: true)
+ */
 export async function GET(req: Request) {
   try {
     await connectDB();
@@ -31,68 +20,52 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const societyName = searchParams.get('societyName');
 
-    // ✅ history enabled by default
+    // history enabled by default
     const includeHistory = searchParams.get('includeHistory') !== 'false';
 
-    // 🔹 CASE 1: ALL societies
+    //  CASE 1: ALL societies
     if (!societyName) {
-      const societies = await Society.find({})
-        .populate('currentConvenor.userId', 'name imgurl')
-        .populate(
-          includeHistory ? 'convenorHistory.userId' : '',
-          'name imgurl'
-        );
+      let query = Society.find({})
+        .populate('currentConvenor.userId', 'name imgurl');
 
-      return NextResponse.json(
-        {
-          societies: societies.map((society) => {
-            const base = {
-              id: society._id,
-              name: society.name,
-              logo: society.logo,
-              currentConvenor: {
-                tech: society.currentConvenor.tech,
-                user: society.currentConvenor.userId
-              },
-              currentCoConvenors: society.currentCoConvenors
-            };
+      if (includeHistory) {
+        query = query.populate('convenorHistory.userId', 'name imgurl');
+      }
 
-            if (includeHistory) {
-              return {
-                ...base,
-                convenorHistory: groupByTechSorted(
-                  society.convenorHistory.map((c: { userId: any; tech: any; }) => ({
-                    user: c.userId,
-                    tech: c.tech
-                  }))
-                ),
-                coConvenorHistory: groupByTechSorted(
-                  society.coConvenorHistory
-                )
-              };
-            }
+      const societies = await query;
 
-            return base;
-          })
-        },
-        { status: 200 }
-      );
+      const data = societies.map((society) =>
+            formatSocietyConvenors(
+              society,
+              society.currentConvenor.userId,
+              includeHistory
+            )
+          );
+
+          return NextResponse.json(
+            {
+              success: true,
+              data,
+            },
+            { status: 200 }
+          );
     }
-
-    // 🔹 CASE 2: Single society
-    if (!Object.values(SOCIETY_NAMES).includes(societyName as SOCIETY_NAMES)) {
+    //  CASE 2: Single society
+    if (!Object.values(SOCIETY_NAMES).includes(societyName as any)) {
       return NextResponse.json(
         { message: 'Invalid society name' },
         { status: 400 }
       );
     }
 
-    const society = await Society.findOne({ name: societyName })
-      .populate('currentConvenor.userId', 'name imgurl')
-      .populate(
-        includeHistory ? 'convenorHistory.userId' : '',
-        'name imgurl'
-      );
+    let query = Society.findOne({ name: societyName })
+      .populate('currentConvenor.userId', 'name imgurl');
+
+    if (includeHistory) {
+      query = query.populate('convenorHistory.userId', 'name imgurl');
+    }
+
+    const society = await query;
 
     if (!society) {
       return NextResponse.json(
@@ -101,33 +74,22 @@ export async function GET(req: Request) {
       );
     }
 
-    const response: any = {
-      id: society._id,
-      name: society.name,
-      logo: society.logo,
-      currentConvenor: {
-        tech: society.currentConvenor.tech,
-        user: society.currentConvenor.userId
+    const data = formatSocietyConvenors(
+      society,
+      society.currentConvenor.userId,
+      includeHistory
+    );
+
+
+return NextResponse.json(
+      {
+        success: true,
+        data,
       },
-      currentCoConvenors: society.currentCoConvenors
-    };
-
-    if (includeHistory) {
-      response.convenorHistory = groupByTechSorted(
-        society.convenorHistory.map((c: { userId: any; tech: any; }) => ({
-          user: c.userId,
-          tech: c.tech
-        }))
-      );
-
-      response.coConvenorHistory = groupByTechSorted(
-        society.coConvenorHistory
-      );
-    }
-
-    return NextResponse.json({ society: response }, { status: 200 });
-  } catch (error) {
-    console.error(error);
+      { status: 200 }
+    );
+    } catch (error) {
+    console.error('GET /api/convenors error:', error);
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }
